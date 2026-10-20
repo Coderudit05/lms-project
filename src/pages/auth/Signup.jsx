@@ -5,7 +5,6 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import toast from "react-hot-toast";
 
 import Input from "../../components/ui/Input";
-import Select from "../../components/ui/Select";
 import Button from "../../components/ui/Button";
 
 import { auth, db } from "../../firebase/firebase"; // firebase import
@@ -17,7 +16,6 @@ function Signup() {
   const [name, setName] = useState(""); // store name input
   const [email, setEmail] = useState(""); // store email input
   const [password, setPassword] = useState(""); // store password input
-  const [role, setRole] = useState("student"); // default role
   const [loading, setLoading] = useState(false); // button loader
 
   // ---------- SIGNUP FUNCTION ----------
@@ -52,15 +50,15 @@ function Signup() {
         uid: user.uid,
         name: name,
         email: email,
-        role: role,
+        role: "student",
         createdAt: serverTimestamp(),
       });
       toast.dismiss(toastId); // yaha par toast ko dismiss karna hai toast matlab ke loading wala jo create ho rha hai wo dismiss ho jaye
       toast.success("Signup successful!");
 
-      // 4) Redirect user based on role
-      if (role === "instructor") navigate("/instructor/dashboard");
-      else navigate("/student/dashboard");
+      // New accounts always start as students. Instructor access must be granted
+      // through a trusted approval flow, not selected during public signup.
+      navigate("/student/dashboard");
     } catch (error) {
       console.error(error);
       toast.dismiss(toastId);
@@ -107,16 +105,6 @@ function Signup() {
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <Select
-            label="Select Role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            options={[
-              { value: "student", label: "Student" },
-              { value: "instructor", label: "Instructor" },
-            ]}
           />
 
           <Button className="w-full" variant="success" type="submit">
